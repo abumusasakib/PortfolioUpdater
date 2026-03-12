@@ -121,7 +121,7 @@ def update_website(data, base_dir):
                     hr = body.find('hr')
                     if hr:
                         # Clear old education content after hr
-                        for sibling in hr.find_all_next():
+                        for sibling in hr.find_next_siblings():
                             sibling.decompose()
                         
                         container = soup.new_tag('div', attrs={'class': 'card-text'})
