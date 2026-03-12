@@ -1,0 +1,25 @@
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+pip-log.txt
+pip-delete-this-directory.txt
+.tox/
+.coverage
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.log
+.gemini/
+
+# Project specific
+sheets.txt
+verify_output.txt
+excel_inspect.txt
+test_extraction.py
+*.pdf
+*.xlsx
