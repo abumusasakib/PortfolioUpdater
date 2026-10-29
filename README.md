@@ -42,6 +42,7 @@ Automate your portfolio website generation by maintaining your data in a structu
 
 - **Full Site Sync**: Automatically updates all 5 pages of the portfolio website.
 - **Dynamic Projects**: Populates the "Projects" page from the `07-project-roles` sheet.
+- **Selected Impact**: Preserves evidence-backed, curated outcomes for named long-running projects while retaining resume-derived project data.
 - **Thematic Skill Cards**: Maps skill categories to relevant images automatically.
 - **Common Elements**: Synchronizes navigation and footer (including social links and copyright) across all pages.
 - **Smart Formatting**: Handles complex Excel structures and formats dates correctly.

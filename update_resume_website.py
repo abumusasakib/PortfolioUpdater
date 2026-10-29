@@ -8,6 +8,15 @@ from bs4 import BeautifulSoup
 from extract_excel_data import extract_excel_data
 
 
+PROMINENT_PROJECT_HIGHLIGHTS = {
+    'internet banking system': [
+        'Built an offline demo experience with a guided NPSB beneficiary and fund-transfer journey.',
+        'Hardened Android banking protections across screen capture, remote-access detection, and runtime integrity checks.',
+        'Delivered Bangla QR payment improvements, from dashboard scanning through safer navigation around drawers and sheets.',
+        'Improved registration reliability with account-posting safeguards, cross-platform clock-skew handling, and corrected back navigation.',
+    ],
+}
+
 def public_location(address):
     """Keep a public portfolio at city/country precision, not street precision."""
     if not address:
@@ -42,6 +51,14 @@ def project_presentation(project_name):
     if 'color' in name or 'fastapi' in name:
         return ('vision', 'fa-eye')
     return ('product', 'fa-gamepad')
+
+
+def project_highlights(project):
+    """Use curated, evidence-backed outcomes where a project has them."""
+    return PROMINENT_PROJECT_HIGHLIGHTS.get(
+        project.get('name', '').strip().lower(),
+        project.get('tasks', [])[-3:],
+    )
 
 
 def inspect_and_verify(excel_path):
@@ -209,11 +226,17 @@ def update_projects(soup, data):
             append_text(soup, client, 'dt', 'Client')
             append_text(soup, client, 'dd', project['client'])
             facts.append(client)
-        if project.get('tasks'):
+        highlights = project_highlights(project)
+        if highlights:
             highlights = soup.new_tag('div')
-            append_text(soup, highlights, 'dt', 'Recent delivery')
+            label = (
+                'Selected impact'
+                if project['name'].strip().lower() in PROMINENT_PROJECT_HIGHLIGHTS
+                else 'Recent delivery'
+            )
+            append_text(soup, highlights, 'dt', label)
             highlight_list = soup.new_tag('ul', attrs={'class': 'project-highlights'})
-            for task in project['tasks'][-3:]:
+            for task in project_highlights(project):
                 append_text(soup, highlight_list, 'li', task)
             highlights.append(highlight_list)
             facts.append(highlights)
