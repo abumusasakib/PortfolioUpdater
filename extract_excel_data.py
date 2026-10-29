@@ -1,11 +1,13 @@
 import openpyxl
-from reportlab.lib.pagesizes import letter
-from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from reportlab.lib.units import inch
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
-from reportlab.lib.enums import TA_LEFT, TA_CENTER, TA_JUSTIFY
-from reportlab.lib import colors
 from datetime import datetime
+import re
+
+
+def first_email(value):
+    """Return the first comma- or semicolon-separated email address."""
+    if not value:
+        return ''
+    return next((part.strip() for part in re.split(r'[,;]', str(value)) if part.strip()), '')
 
 # Function to extract data from Excel
 def extract_excel_data(excel_path):
@@ -113,6 +115,7 @@ def extract_excel_data(excel_path):
             key = str(row[1]).strip()
             value = str(row[2]).strip()
             contact[key] = value
+    contact['Email'] = first_email(personal.get('Emails')) or first_email(contact.get('Email'))
     data['contact'] = contact
     
     # Extract projects
@@ -144,7 +147,10 @@ def extract_excel_data(excel_path):
             if d == 'Project/Product':
                 if current_project and current_project.get('name'):
                     projects.append(current_project)
-                current_project = {'name': '', 'description': '', 'tech': [], 'tasks': []}
+                current_project = {
+                    'name': '', 'client': '', 'description': '', 'role': '',
+                    'tech': [], 'tasks': []
+                }
                 state = 'waiting_name'
 
             elif state == 'waiting_name' and d and d not in CONTROL_LABELS:
@@ -154,18 +160,31 @@ def extract_excel_data(excel_path):
             elif d == 'Project Brief':
                 state = 'brief'
 
+            elif d == 'Client':
+                state = 'client'
+
             elif state == 'brief' and d and d not in CONTROL_LABELS:
                 current_project['description'] = d
+                state = None
+
+            elif state == 'client' and d and d not in CONTROL_LABELS:
+                current_project['client'] = d
                 state = None
 
             elif d == 'Tools and Technology':
                 state = 'tech'
 
+            elif d == 'Role (s) Performed':
+                state = 'role'
+
             elif state == 'tech' and d == '•' and e:
                 # Split on commas that are NOT inside parentheses
-                import re
                 tech_items = [t.strip() for t in re.split(r',\s*(?![^(]*\))', e) if t.strip()]
                 current_project['tech'].extend(tech_items)
+
+            elif state == 'role' and d and d not in CONTROL_LABELS:
+                current_project['role'] = d
+                state = None
 
             elif d == 'Activities/Tasks Performed':
                 state = 'tasks'

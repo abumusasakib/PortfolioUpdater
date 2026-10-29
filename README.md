@@ -15,16 +15,17 @@ Automate your portfolio website generation by maintaining your data in a structu
 1. **Install Requirements**
 
     ```bash
-    pip install openpyxl beautifulsoup4
+    python3 -m venv .venv
+    .venv/bin/pip install openpyxl beautifulsoup4
     ```
 
 2. **Prepare your Excel**
-    Ensure your data is in `Résumé__Abu.Musa.Sakib.xlsx`.
+    Keep the workbook in any local path. The updater accepts its path as an argument.
 
 3. **Update Website**
 
     ```bash
-    python update_resume_website.py
+    .venv/bin/python update_resume_website.py --excel /path/to/resume.xlsx --portfolio /path/to/portfolio-sakib
     ```
 
 4. **Inspect & Verify (Optional)**
@@ -59,4 +60,4 @@ This script:
 
 ## Deployment
 
-Simply run the synchronization script whenever you update your Excel file, and your website will be ready to go!
+Simply run the synchronization script whenever you update your Excel file, and your website will be ready to go. The updater uses only the first address in the personal-information `Emails` field as the public email address.
