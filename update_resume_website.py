@@ -210,10 +210,13 @@ def update_projects(soup, data):
             append_text(soup, client, 'dd', project['client'])
             facts.append(client)
         if project.get('tasks'):
-            focus = soup.new_tag('div')
-            append_text(soup, focus, 'dt', 'Focus')
-            append_text(soup, focus, 'dd', project['tasks'][0])
-            facts.append(focus)
+            highlights = soup.new_tag('div')
+            append_text(soup, highlights, 'dt', 'Recent delivery')
+            highlight_list = soup.new_tag('ul', attrs={'class': 'project-highlights'})
+            for task in project['tasks'][-3:]:
+                append_text(soup, highlight_list, 'li', task)
+            highlights.append(highlight_list)
+            facts.append(highlights)
         content.append(facts)
         technologies = soup.new_tag('div', attrs={'class': 'project-tech'})
         for technology in project.get('tech', []):
