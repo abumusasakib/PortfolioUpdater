@@ -33,15 +33,15 @@ def append_text(soup, parent, tag_name, text, **attrs):
     return tag
 
 
-def project_image(project_name):
+def project_presentation(project_name):
     name = project_name.lower()
+    if 'bank' in name:
+        return ('bank', 'fa-building-columns')
     if 'ocr' in name:
-        return 'img/Showcase-your-Programming-Skills.jpg'
+        return ('ocr', 'fa-file-lines')
     if 'color' in name or 'fastapi' in name:
-        return 'img/LCOM_Website_DigitalLiteracy_Image1_Dec16.png'
-    if 'game' in name or 'quiz' in name:
-        return 'img/skills-word-cloud-business-concept-58626753.jpg'
-    return 'img/92220679-corporate-identity-template-on-white-paper-background-photo-of-blank-stationery-set-mockup-for-desig.jpg'
+        return ('vision', 'fa-eye')
+    return ('product', 'fa-gamepad')
 
 
 def inspect_and_verify(excel_path):
@@ -161,6 +161,11 @@ def update_about(soup, data):
         article.append(body)
         education_list.append(article)
 
+    portrait = soup.select_one('.about-portrait')
+    if portrait:
+        portrait.attrs.pop('width', None)
+        portrait.attrs.pop('height', None)
+
 
 def update_skills(soup, data):
     skills_grid = soup.select_one('.skills-grid')
@@ -184,24 +189,37 @@ def update_projects(soup, data):
     if not projects_grid or not data.get('projects'):
         return
     projects_grid.clear()
-    for project in data['projects']:
-        card = soup.new_tag('article', attrs={'class': 'project-card'})
-        image_container = soup.new_tag('div', attrs={'class': 'project-img-container'})
-        image_container.append(soup.new_tag('img', attrs={
-            'src': project_image(project['name']),
-            'class': 'project-img',
-            'alt': f"Representative image for {project['name']}",
-            'loading': 'lazy',
-        }))
+    for index, project in enumerate(data['projects'], 1):
+        presentation, icon = project_presentation(project['name'])
+        card = soup.new_tag('article', attrs={'class': f'project-card project-card--{presentation}'})
+        visual = soup.new_tag('div', attrs={'class': 'project-visual', 'aria-hidden': 'true'})
+        append_text(soup, visual, 'span', f'{index:02d}', **{'class': 'project-index'})
+        visual.append(soup.new_tag('i', attrs={'class': f'fa-solid {icon} project-icon'}))
         content = soup.new_tag('div', attrs={'class': 'project-content'})
-        append_text(soup, content, 'p', project.get('role') or 'Project experience', **{'class': 'mono-label'})
+        meta = soup.new_tag('div', attrs={'class': 'project-meta'})
+        append_text(soup, meta, 'p', project.get('role') or 'Project experience', **{'class': 'mono-label'})
+        period = ' - '.join(value for value in (project.get('from'), project.get('to')) if value)
+        append_text(soup, meta, 'p', period, **{'class': 'project-period'})
+        content.append(meta)
         append_text(soup, content, 'h2', project['name'], **{'class': 'project-title'})
         append_text(soup, content, 'p', project.get('description', '').strip(), **{'class': 'project-description'})
+        facts = soup.new_tag('dl', attrs={'class': 'project-facts'})
+        if project.get('client'):
+            client = soup.new_tag('div')
+            append_text(soup, client, 'dt', 'Client')
+            append_text(soup, client, 'dd', project['client'])
+            facts.append(client)
+        if project.get('tasks'):
+            focus = soup.new_tag('div')
+            append_text(soup, focus, 'dt', 'Focus')
+            append_text(soup, focus, 'dd', project['tasks'][0])
+            facts.append(focus)
+        content.append(facts)
         technologies = soup.new_tag('div', attrs={'class': 'project-tech'})
         for technology in project.get('tech', []):
             append_text(soup, technologies, 'span', technology, **{'class': 'tech-badge'})
         content.append(technologies)
-        card.append(image_container)
+        card.append(visual)
         card.append(content)
         projects_grid.append(card)
 

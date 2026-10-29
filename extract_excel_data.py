@@ -9,6 +9,12 @@ def first_email(value):
         return ''
     return next((part.strip() for part in re.split(r'[,;]', str(value)) if part.strip()), '')
 
+
+def format_date(value):
+    if isinstance(value, datetime):
+        return value.strftime('%b %Y')
+    return str(value).strip() if value else ''
+
 # Function to extract data from Excel
 def extract_excel_data(excel_path):
     """Extract resume data from Excel file"""
@@ -149,6 +155,7 @@ def extract_excel_data(excel_path):
                     projects.append(current_project)
                 current_project = {
                     'name': '', 'client': '', 'description': '', 'role': '',
+                    'from': format_date(row[1]), 'to': format_date(row[2]),
                     'tech': [], 'tasks': []
                 }
                 state = 'waiting_name'
